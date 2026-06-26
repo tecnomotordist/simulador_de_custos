@@ -171,7 +171,7 @@
 </div>
 
 <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUoawnkg_AwYgDNPdsY7gXSQefxAPVPwSYVwI3mzRo2OSp_nyzuhYNS_OJbLi9AAVX8nibvBoR0fEn/pub?gid=1534734335&single=true&output=csv';
+    const SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyz8kGSNEqz87IGM_z5CQV_KxohNO7VhhUyCGIEyPrZtWWZXhG-ULfBdYnTJNCsBvzN/exec';
     const CUSTO_POR_KM = 1.59;
     
     let baseDados = [];
@@ -181,50 +181,15 @@
     async function carregarDados() {
         const statusEl = document.getElementById('status');
         try {
-            const response = await fetch(SHEET_URL);
-            const csvText = await response.text();
-            
-            // Parse CSV simples (considerando que os campos podem ter vírgulas dentro de aspas se necessário, 
-            // mas aqui usaremos uma lógica para o formato padrão do Google Sheets)
-            const rows = csvText.split('\n').slice(1); // Remove cabeçalho
-            
-            baseDados = rows.map(row => {
-                // Regex para lidar com vírgulas dentro de aspas (comum em nomes de cidades "Cidade, UF")
-                const cols = [];
-                let inQuote = false;
-                let currentField = '';
-                for (let i = 0; i < row.length; i++) {
-                    const char = row[i];
-                    if (char === '"') {
-                        inQuote = !inQuote;
-                    } else if (char === ',' && !inQuote) {
-                        cols.push(currentField.trim());
-                        currentField = '';
-                    } else {
-                        currentField += char;
-                    }
-                }
-                cols.push(currentField.trim()); // Add the last field
+            const response = await fetch(SCRIPT_WEB_APP_URL);
+            const data = await response.json();
 
-                
-                if (cols && cols.length >= 5) {
-                    const cidade = cols[0].replace(/^"|"$/g, '');
-                    const atendente = cols[1].replace(/^"|"$/g, '');
-                    const partida = cols[2].replace(/^"|"$/g, '');
-                    const equipsStr = cols[3].replace(/^"|"$/g, '');
-                    const todosEquipsStr = cols[4].replace(/^"|"$/g, '');
-                    
-                    // Extrair equipamentos para a lista de sugestões
-if (todosEquipsStr) {
-                        todosEquipsStr.split(/ - | \/ |, /).forEach(e => {
-                            if(e.trim()) listaEquipamentos.add(e.trim().toUpperCase());
-                        });
-                    }
+            if (data.error) {
+                throw new Error(data.error);
+            }
 
-                    return { cidade, atendente, partida, equipamentos: equipsStr };
-                }
-                return null;
-            }).filter(item => item !== null);
+            baseDados = data.baseDados;
+            listaEquipamentos = new Set(data.listaEquipamentos);
 
             statusEl.textContent = "Dados carregados com sucesso!";
             document.getElementById('btn-calcular').disabled = false;
