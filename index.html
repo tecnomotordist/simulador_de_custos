@@ -324,6 +324,7 @@
             } else {
                 const distancia = await obterDistancia(coordOrigem, coordDestino);
                 if (distancia) {
+                    const distanciaTotal = distancia * 2;
                     const custo = distancia * CUSTO_POR_KM;
                     document.getElementById('res-tecnico').textContent = tecnico;
                     document.getElementById('res-partida').textContent = partida;
