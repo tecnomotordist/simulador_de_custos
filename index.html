@@ -323,16 +323,20 @@
                 alert("Erro ao localizar as coordenadas dos municípios no GPS.");
             } else {
                 const distancia = await obterDistancia(coordOrigem, coordDestino);
-                if (distancia) {
-                    const distanciaTotal = distancia * 2;
-                    const custo = distancia * CUSTO_POR_KM;
-                    document.getElementById('res-tecnico').textContent = tecnico;
-                    document.getElementById('res-partida').textContent = partida;
-                    document.getElementById('res-equip').textContent = equipsRegiao;
-                    document.getElementById('res-km').textContent = distancia.toFixed(1).replace('.', ',');
-                    document.getElementById('res-custo').textContent = custo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    resultadoBox.style.display = 'block';
-                } else {
+if (distancia) {
+    // ALTERAÇÃO AQUI: Multiplicamos a distância por 2 para considerar Ida e Volta
+    const distanciaTotal = distancia * 2; 
+    const custo = distanciaTotal * CUSTO_POR_KM;
+    
+    document.getElementById('res-tecnico').textContent = tecnico;
+    document.getElementById('res-partida').textContent = partida;
+    document.getElementById('res-equip').textContent = equipsRegiao;
+    
+    // Atualiza a tela com a quilometragem total (Ida + Volta)
+    document.getElementById('res-km').textContent = distanciaTotal.toFixed(1).replace('.', ',');
+    document.getElementById('res-custo').textContent = custo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    resultadoBox.style.display = 'block';
+} else {
                     alert("Não foi possível traçar uma rota rodoviária válida.");
                 }
             }
